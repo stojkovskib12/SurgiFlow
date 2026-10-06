@@ -7,6 +7,7 @@ import type {
 
 export interface HomePageViewProps {
   cases: SurgicalCase[];
+  casesLoading: boolean;
   todayCases: SurgicalCase[];
   filteredCases: SurgicalCase[];
   activeSection: WorkspaceSection;
@@ -19,8 +20,8 @@ export interface HomePageViewProps {
   onSearchChange: (searchTerm: string) => void;
   onOpenCaseForm: () => void;
   onCloseCaseForm: () => void;
-  onCreateCase: (newCase: NewSurgicalCase) => string | null;
+  onCreateCase: (newCase: NewSurgicalCase) => Promise<string | null>;
   onStatusChange: (caseId: string, status: CaseStatus) => void;
   onDocumentToggle: (caseId: string, documentId: string) => void;
-  onResetDemo: () => void;
+  onRefreshCases: () => void;
 }

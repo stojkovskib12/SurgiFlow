@@ -54,7 +54,7 @@
     "acrossRooms": "Across 3 operating rooms",
     "todaySchedule": "Today’s schedule",
     "viewSchedule": "View schedule",
-    "sampleNotice": "Sample workspace data is stored in this browser. Use the reset control below to restore the examples."
+    "sampleNotice": "Case and readiness information is synchronized with your SurgiFlow service."
   },
   "cases": {
     "eyebrow": "SURGICAL REGISTER",
@@ -141,6 +141,7 @@
     "roomOption": "Operating room {{number}}",
     "cancel": "Cancel",
     "submit": "Add case",
+    "saving": "Saving…",
     "roomConflict": "{{room}} already has a case booked during that time. Choose another room or start time."
   },
   "status": {
@@ -156,16 +157,18 @@
     "statusUpdated": "{{caseId}} status updated.",
     "documentsUpdated": "{{caseId}} documentation updated.",
     "sampleRestored": "Sample cases restored.",
-    "storageUnavailable": "Changes are available for this session but could not be saved in this browser."
+    "storageUnavailable": "Changes are available for this session but could not be saved in this browser.",
+    "apiUnavailable": "The SurgiFlow service could not be reached. Check the API connection and try again.",
+    "refreshed": "Cases refreshed from the SurgiFlow service."
   },
   "common": {
     "addCase": "＋ Add case",
-    "restoreSampleData": "Restore sample data",
+    "refreshCases": "Refresh cases",
     "today": "Today",
     "noCasesToday": "No cases scheduled for today.",
     "noCasesYet": "No cases yet. Add a case to start the checklist.",
     "footerTagline": "SURGICAL CARE, IN SYNC",
-    "footerDescription": "Local demo workspace · not connected to a hospital system",
+    "footerDescription": "SurgiFlow service · surgical operations workspace",
     "loading": "Loading workspace…",
     "operatingRoom": "OR {{number}}"
   }

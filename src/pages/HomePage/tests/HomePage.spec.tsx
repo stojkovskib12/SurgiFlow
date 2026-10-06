@@ -5,9 +5,11 @@ import { Provider } from "react-redux";
 import { createAppStore } from "../../../app/store";
 import { WorkspaceProvider } from "../../../app/WorkspaceContext/WorkspaceContext";
 import HomePage from "../HomePage.logic";
-import { STORAGE_KEY } from "../../../domain/surgicalCases";
+import { mockSurgiFlowApi } from "./apiMock";
 
 describe("HomePage", () => {
+  let apiFetch: jest.Mock;
+
   const renderHomePage = () => render(
     <Provider store={createAppStore()}>
       <WorkspaceProvider>
@@ -19,15 +21,15 @@ describe("HomePage", () => {
   );
 
   beforeEach(() => {
-    window.localStorage.removeItem(STORAGE_KEY);
+    apiFetch = mockSurgiFlowApi();
   });
 
-  it("shows today's cases and the operations metrics", () => {
+  it("shows today's cases and the operations metrics", async () => {
     renderHomePage();
 
     expect(screen.getByRole("heading", { name: /here’s your day/i })).toBeInTheDocument();
     expect(screen.getByText("CASES TODAY")).toBeInTheDocument();
-    expect(screen.getByText("Laparoscopic cholecystectomy")).toBeInTheDocument();
+    expect(await screen.findByText("Laparoscopic cholecystectomy")).toBeInTheDocument();
   });
 
   it("translates route content and navigation when the language changes", async () => {
@@ -59,7 +61,7 @@ describe("HomePage", () => {
     await user.click(screen.getByRole("button", { name: "Add case" }));
     await user.click(screen.getByRole("button", { name: "Cases" }));
 
-    expect(screen.getByText("SF-2046")).toBeInTheDocument();
+    expect(await screen.findByText("SF-2046")).toBeInTheDocument();
     expect(screen.getByText("Appendectomy")).toBeInTheDocument();
 
     await user.type(screen.getByRole("textbox", { name: "Search cases" }), "Patient 6401");
@@ -77,20 +79,25 @@ describe("HomePage", () => {
     await user.type(screen.getByLabelText("Lead surgeon"), "Dr. Casey Stone");
     await user.click(screen.getByRole("button", { name: "Add case" }));
 
-    expect(screen.getByRole("alert")).toHaveTextContent("OR 1 already has a case booked");
+    expect(await screen.findByRole("alert")).toHaveTextContent("OR 1 already has a case booked");
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
-  it("updates case status and persists changes in browser storage", async () => {
+  it("updates case status through the API", async () => {
     const user = userEvent.setup();
     renderHomePage();
 
     await user.click(screen.getByRole("button", { name: "Cases" }));
-    await user.selectOptions(screen.getByRole("combobox", { name: "Update status for SF-2041" }), "In progress");
+    await user.selectOptions(
+      await screen.findByRole("combobox", { name: "Update status for SF-2041" }),
+      "In progress",
+    );
 
+    await screen.findByRole("status");
     expect(screen.getByRole("combobox", { name: "Update status for SF-2041" })).toHaveValue("In progress");
-    expect(JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "[]")).toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: "SF-2041", status: "In progress" })]),
+    expect(apiFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/cases/00000000-0000-4000-8000-000000002041/status"),
+      expect.objectContaining({ method: "PATCH" }),
     );
   });
 
@@ -99,7 +106,7 @@ describe("HomePage", () => {
     renderHomePage();
 
     await user.click(screen.getByRole("button", { name: "Documentation" }));
-    await user.click(screen.getByRole("checkbox", { name: "Pre-op assessment for SF-2043" }));
+    await user.click(await screen.findByRole("checkbox", { name: "Pre-op assessment for SF-2043" }));
     await user.click(screen.getByRole("checkbox", { name: "Imaging review for SF-2043" }));
 
     const caseCard = screen.getByText("SF-2043 · Patient 3176").closest("article");

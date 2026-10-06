@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import AboutPanel from "../../components/AboutPanel/AboutPanel.logic";
 import CaseForm from "../../components/CaseForm/CaseForm.logic";
 import Header from "../../components/Header/Header.logic";
-import CapacityView from "./Capacity/Capacity.view";
+import Capacity from "./Capacity/Capacity.logic";
 import CasesView from "./Cases/Cases.view";
 import DocumentationView from "./Documentation/Documentation.view";
 import OverviewView from "./Overview/Overview.view";
@@ -17,9 +17,10 @@ const HomePageView = (props: HomePageViewProps): JSX.Element => {
     activeSection,
     isCaseFormOpen,
     notice,
+    casesLoading,
     onCloseCaseForm,
     onCreateCase,
-    onResetDemo,
+    onRefreshCases,
     onSectionChange,
   } = props;
   const sectionViews = {
@@ -27,7 +28,7 @@ const HomePageView = (props: HomePageViewProps): JSX.Element => {
     Cases: <CasesView {...props} />,
     Schedule: <ScheduleView {...props} />,
     Documentation: <DocumentationView {...props} />,
-    Capacity: <CapacityView {...props} />,
+    Capacity: <Capacity {...props} />,
   };
 
   return (
@@ -35,15 +36,15 @@ const HomePageView = (props: HomePageViewProps): JSX.Element => {
       <AboutPanel activeSection={activeSection} onSectionChange={onSectionChange} />
       <div className="app-workspace">
         <Header sectionName={activeSection} />
-        <main className="workspace-main">
+        <main aria-busy={casesLoading} className="workspace-main">
           {notice && (
             <div aria-live="polite" className="workspace-notice" role="status">
               <span>✓</span>{t(notice.key, { caseId: notice.caseId })}
             </div>
           )}
           {sectionViews[activeSection]}
-          <button className="reset-demo-button" onClick={onResetDemo} type="button">
-            {t("common.restoreSampleData")}
+          <button className="reset-demo-button" onClick={onRefreshCases} type="button">
+            {t("common.refreshCases")}
           </button>
         </main>
         <footer className="app-footer">

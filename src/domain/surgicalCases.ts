@@ -16,12 +16,14 @@ export type CasePriority = "Routine" | "Urgent";
 
 export interface SurgicalDocument {
   id: string;
+  entityId?: string;
   label: string;
   complete: boolean;
 }
 
 export interface SurgicalCase {
   id: string;
+  entityId?: string;
   patientId: string;
   procedure: string;
   surgeon: string;
@@ -60,8 +62,6 @@ export const REQUIRED_DOCUMENTS = [
 ];
 
 export const OPERATING_ROOMS = ["OR 1", "OR 2", "OR 3"];
-
-export const STORAGE_KEY = "surgiflow-cases-v1";
 
 export const toDateKey = (date: Date): string => {
   const year = date.getFullYear();
@@ -153,21 +153,4 @@ export const createDemoCases = (today = new Date()): SurgicalCase[] => {
       documents: makeDocuments(0),
     },
   ];
-};
-
-export const readCasesFromStorage = (): SurgicalCase[] => {
-  try {
-    const storedValue = window.localStorage.getItem(STORAGE_KEY);
-
-    if (storedValue) {
-      const parsedValue: unknown = JSON.parse(storedValue);
-      if (Array.isArray(parsedValue)) {
-        return parsedValue as SurgicalCase[];
-      }
-    }
-  } catch {
-    // Start with sample records when browser storage is unavailable or invalid.
-  }
-
-  return createDemoCases();
 };

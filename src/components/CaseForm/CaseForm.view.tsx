@@ -6,12 +6,13 @@ import "./CaseForm.scss";
 export interface CaseFormViewProps {
   values: NewSurgicalCase;
   submitError: string;
+  isSubmitting: boolean;
   onChange: (field: keyof NewSurgicalCase, value: string | number) => void;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
 
-const CaseFormView = ({ values, submitError, onChange, onClose, onSubmit }: CaseFormViewProps): JSX.Element => {
+const CaseFormView = ({ values, submitError, isSubmitting, onChange, onClose, onSubmit }: CaseFormViewProps): JSX.Element => {
   const { t } = useTranslation();
 
   return (
@@ -115,7 +116,7 @@ const CaseFormView = ({ values, submitError, onChange, onClose, onSubmit }: Case
         {submitError && <p className="form-error form-field-wide" role="alert">{submitError}</p>}
         <div className="case-form-actions form-field-wide">
           <button className="button-secondary" onClick={onClose} type="button">{t("caseForm.cancel")}</button>
-          <button className="button-primary" type="submit">{t("caseForm.submit")}</button>
+          <button className="button-primary" disabled={isSubmitting} type="submit">{isSubmitting ? t("caseForm.saving") : t("caseForm.submit")}</button>
         </div>
       </form>
     </section>

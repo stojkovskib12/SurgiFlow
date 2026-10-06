@@ -9,6 +9,7 @@ export const createSectionProps = (): HomePageViewProps => {
 
   return {
     cases,
+    casesLoading: false,
     todayCases: cases.filter((item) => item.date === getTodayKey()),
     filteredCases: cases,
     activeSection: "Overview",
@@ -21,10 +22,10 @@ export const createSectionProps = (): HomePageViewProps => {
     onSearchChange: jest.fn(),
     onOpenCaseForm: jest.fn(),
     onCloseCaseForm: jest.fn(),
-    onCreateCase: jest.fn(() => null),
+    onCreateCase: jest.fn(async () => null),
     onStatusChange: jest.fn(),
     onDocumentToggle: jest.fn(),
-    onResetDemo: jest.fn(),
+    onRefreshCases: jest.fn(),
   };
 };
 

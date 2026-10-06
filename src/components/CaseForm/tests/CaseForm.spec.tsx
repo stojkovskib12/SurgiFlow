@@ -29,7 +29,7 @@ describe("CaseForm", () => {
     render(
       <CaseForm
         onClose={jest.fn()}
-        onCreateCase={() => "OR 1 already has a case booked during that time."}
+        onCreateCase={async () => "OR 1 already has a case booked during that time."}
       />,
     );
 

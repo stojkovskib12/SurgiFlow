@@ -5,7 +5,7 @@ import CaseFormView from "./CaseForm.view";
 
 interface CaseFormProps {
   onClose: () => void;
-  onCreateCase: (newCase: NewSurgicalCase) => string | null;
+  onCreateCase: (newCase: NewSurgicalCase) => Promise<string | null>;
 }
 
 const getInitialValues = (): NewSurgicalCase => ({
@@ -22,14 +22,17 @@ const getInitialValues = (): NewSurgicalCase => ({
 const CaseForm = ({ onClose, onCreateCase }: CaseFormProps): JSX.Element => {
   const [values, setValues] = useState<NewSurgicalCase>(getInitialValues);
   const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (field: keyof NewSurgicalCase, value: string | number): void => {
     setValues((currentValues) => ({ ...currentValues, [field]: value }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const error = onCreateCase(values);
+    setIsSubmitting(true);
+    const error = await onCreateCase(values);
+    setIsSubmitting(false);
 
     if (error) {
       setSubmitError(error);
@@ -43,6 +46,7 @@ const CaseForm = ({ onClose, onCreateCase }: CaseFormProps): JSX.Element => {
     <CaseFormView
       values={values}
       submitError={submitError}
+      isSubmitting={isSubmitting}
       onChange={handleChange}
       onClose={onClose}
       onSubmit={handleSubmit}

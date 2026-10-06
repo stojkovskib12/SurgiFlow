@@ -1,1 +1,1 @@
-window.REACT_API_URL = "http://localhost:5000";
+window.REACT_API_URL = "http://localhost:5146";
