@@ -1,0 +1,23 @@
+.workspace-header {
+  height: 72px;
+  padding: 0 clamp(24px, 4vw, 60px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid #e3eaf0;
+}
+
+.workspace-breadcrumb { display: flex; align-items: center; gap: 14px; color: #8796a5; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+.breadcrumb-divider { color: #c0cbd3; font-size: 16px; font-weight: 400; }
+.breadcrumb-current { color: #23463f; font-size: 13px; font-weight: 600; letter-spacing: 0; }
+.header-tools { display: flex; align-items: center; gap: 20px; }
+.workspace-status { display: inline-flex; align-items: center; gap: 8px; color: #647787; font-size: 12px; }
+.workspace-status > span { width: 8px; height: 8px; border-radius: 50%; background: #50a58a; box-shadow: 0 0 0 3px #e7f3ef; }
+.profile-button { width: 36px; height: 36px; border: 1px solid #d7e7e1; border-radius: 12px; background: #edf5f1; color: #285b4d; font-size: 11px; font-weight: 800; }
+
+@media (max-width: 600px) {
+  .workspace-header { height: 62px; padding: 0 18px; }
+  .workspace-breadcrumb { gap: 9px; font-size: 9px; }
+  .workspace-status { display: none; }
+}
