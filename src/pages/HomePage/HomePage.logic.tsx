@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation, useNavigate } from "react-router-dom";
 import type {
   CaseStatus,
   NewSurgicalCase,
@@ -15,19 +17,37 @@ import {
 } from "../../domain/surgicalCases";
 import HomePageView from "./HomePage.view";
 
-const HomePage = (): JSX.Element => {
+interface HomePageProps {
+  basePath: string;
+}
+
+const sectionPaths: Record<WorkspaceSection, string> = {
+  Overview: "home",
+  Cases: "cases",
+  Schedule: "schedule",
+  Documentation: "documentation",
+  Capacity: "capacity",
+};
+
+const HomePage = ({ basePath }: HomePageProps): JSX.Element => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const baseSegmentCount = basePath.split("/").filter(Boolean).length;
+  const routeSegment = pathname.split("/").filter(Boolean).slice(baseSegmentCount).at(-1);
+  const activeSection = (Object.entries(sectionPaths).find(([, path]) => path === routeSegment)?.[0]
+    ?? "Overview") as WorkspaceSection;
   const [cases, setCases] = useState<SurgicalCase[]>(readCasesFromStorage);
-  const [activeSection, setActiveSection] = useState<WorkspaceSection>("Overview");
   const [selectedDate, setSelectedDate] = useState(getTodayKey);
   const [searchTerm, setSearchTerm] = useState("");
   const [isCaseFormOpen, setCaseFormOpen] = useState(false);
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState<{ key: string; caseId?: string } | null>(null);
 
   useEffect(() => {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
     } catch {
-      setNotice("Changes are available for this session but could not be saved in this browser.");
+      setNotice({ key: "notifications.storageUnavailable" });
     }
   }, [cases]);
 
@@ -69,7 +89,11 @@ const HomePage = (): JSX.Element => {
     });
 
     if (hasRoomConflict) {
-      return `${newCase.operatingRoom} already has a case booked during that time. Choose another room or start time.`;
+      return t("caseForm.roomConflict", {
+        room: t("common.operatingRoom", {
+          number: newCase.operatingRoom.replace(/\D/g, ""),
+        }),
+      });
     }
 
     const largestId = cases.reduce((largest, surgicalCase) => {
@@ -88,7 +112,7 @@ const HomePage = (): JSX.Element => {
     };
 
     setCases((currentCases) => [...currentCases, surgicalCase]);
-    setNotice(`${surgicalCase.id} added to the surgical schedule.`);
+    setNotice({ key: "notifications.added", caseId: surgicalCase.id });
     return null;
   };
 
@@ -96,7 +120,7 @@ const HomePage = (): JSX.Element => {
     setCases((currentCases) => currentCases.map((surgicalCase) => (
       surgicalCase.id === caseId ? { ...surgicalCase, status } : surgicalCase
     )));
-    setNotice(`${caseId} status updated.`);
+    setNotice({ key: "notifications.statusUpdated", caseId });
   };
 
   const handleDocumentToggle = (caseId: string, documentId: string): void => {
@@ -119,13 +143,25 @@ const HomePage = (): JSX.Element => {
 
       return { ...surgicalCase, documents, status };
     }));
-    setNotice(`${caseId} documentation updated.`);
+    setNotice({ key: "notifications.documentsUpdated", caseId });
   };
 
   const handleResetDemo = (): void => {
     setCases(createDemoCases());
-    setNotice("Sample cases restored.");
+    setNotice({ key: "notifications.sampleRestored" });
   };
+
+  const handleSectionChange = (section: WorkspaceSection): void => {
+    navigate(`${basePath}/${sectionPaths[section]}`);
+  };
+
+  useEffect(() => {
+    const isKnownRoute = Object.values(sectionPaths).includes(routeSegment ?? "");
+
+    if (!isKnownRoute) {
+      navigate(`${basePath}/home`, { replace: true });
+    }
+  }, [basePath, navigate, routeSegment]);
 
   return (
     <HomePageView
@@ -137,7 +173,7 @@ const HomePage = (): JSX.Element => {
       searchTerm={searchTerm}
       isCaseFormOpen={isCaseFormOpen}
       notice={notice}
-      onSectionChange={setActiveSection}
+      onSectionChange={handleSectionChange}
       onSelectedDateChange={setSelectedDate}
       onSearchChange={setSearchTerm}
       onOpenCaseForm={() => setCaseFormOpen(true)}

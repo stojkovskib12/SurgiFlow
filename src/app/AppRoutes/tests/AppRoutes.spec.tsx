@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import AppRoutes from "../AppRoutes.logic";
 
 describe("AppRoutes", () => {
@@ -14,5 +15,16 @@ describe("AppRoutes", () => {
     render(<AppRoutes baseRouteName="/surgiflow/" isStandaloneApp />);
 
     expect(await screen.findByRole("heading", { name: /here’s your day/i })).toBeInTheDocument();
+  });
+
+  it("navigates between workspace sections using their URLs", async () => {
+    const user = userEvent.setup();
+    window.history.pushState({}, "", "/home");
+    render(<AppRoutes baseRouteName="" isStandaloneApp />);
+
+    await user.click(await screen.findByRole("button", { name: "Schedule" }));
+
+    expect(window.location.pathname).toBe("/schedule");
+    expect(screen.getByRole("heading", { name: /operating room schedule/i })).toBeInTheDocument();
   });
 });

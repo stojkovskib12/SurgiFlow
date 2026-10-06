@@ -1,24 +1,48 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import HomePage from "../HomePage.logic";
 import { STORAGE_KEY } from "../../../domain/surgicalCases";
 
 describe("HomePage", () => {
+  const renderHomePage = () => render(
+    <MemoryRouter>
+      <HomePage basePath="" />
+    </MemoryRouter>,
+  );
+
   beforeEach(() => {
     window.localStorage.removeItem(STORAGE_KEY);
   });
 
   it("shows today's cases and the operations metrics", () => {
-    render(<HomePage />);
+    renderHomePage();
 
     expect(screen.getByRole("heading", { name: /here’s your day/i })).toBeInTheDocument();
     expect(screen.getByText("CASES TODAY")).toBeInTheDocument();
     expect(screen.getByText("Laparoscopic cholecystectomy")).toBeInTheDocument();
   });
 
+  it("translates route content and navigation when the language changes", async () => {
+    const user = userEvent.setup();
+    renderHomePage();
+
+    await user.selectOptions(screen.getByRole("combobox", { name: "Language" }), "mkd");
+    expect(screen.getByRole("heading", { name: /Еве го денешниот распоред/ })).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute("lang", "mk");
+
+    await user.click(screen.getByRole("button", { name: "Случаи" }));
+    expect(screen.getByRole("heading", { name: /и координација/ })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "ПРОЦЕДУРА" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Распоред" }));
+    expect(screen.getByRole("heading", { name: /операционите сали/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Сала 1" })).toBeInTheDocument();
+  });
+
   it("creates a case and makes it searchable in the case register", async () => {
     const user = userEvent.setup();
-    render(<HomePage />);
+    renderHomePage();
 
     await user.click(screen.getByRole("button", { name: "＋ Add case" }));
     await user.type(screen.getByLabelText("Patient reference"), "Patient 6401");
@@ -38,7 +62,7 @@ describe("HomePage", () => {
 
   it("blocks a case that overlaps an existing booking in the same room", async () => {
     const user = userEvent.setup();
-    render(<HomePage />);
+    renderHomePage();
 
     await user.click(screen.getByRole("button", { name: "＋ Add case" }));
     await user.type(screen.getByLabelText("Patient reference"), "Patient 6402");
@@ -52,7 +76,7 @@ describe("HomePage", () => {
 
   it("updates case status and persists changes in browser storage", async () => {
     const user = userEvent.setup();
-    render(<HomePage />);
+    renderHomePage();
 
     await user.click(screen.getByRole("button", { name: "Cases" }));
     await user.selectOptions(screen.getByRole("combobox", { name: "Update status for SF-2041" }), "In progress");
@@ -65,7 +89,7 @@ describe("HomePage", () => {
 
   it("marks a case ready when its required documents are complete", async () => {
     const user = userEvent.setup();
-    render(<HomePage />);
+    renderHomePage();
 
     await user.click(screen.getByRole("button", { name: "Documentation" }));
     await user.click(screen.getByRole("checkbox", { name: "Pre-op assessment for SF-2043" }));

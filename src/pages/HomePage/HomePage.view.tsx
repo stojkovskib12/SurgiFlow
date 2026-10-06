@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import { useTranslation } from "react-i18next";
 import AboutPanel from "../../components/AboutPanel/AboutPanel.logic";
 import CaseForm from "../../components/CaseForm/CaseForm.logic";
 import Header from "../../components/Header/Header.logic";
@@ -19,7 +20,7 @@ export interface HomePageViewProps {
   selectedDate: string;
   searchTerm: string;
   isCaseFormOpen: boolean;
-  notice: string;
+  notice: { key: string; caseId?: string } | null;
   onSectionChange: (section: WorkspaceSection) => void;
   onSelectedDateChange: (date: string) => void;
   onSearchChange: (searchTerm: string) => void;
@@ -31,20 +32,20 @@ export interface HomePageViewProps {
   onResetDemo: () => void;
 }
 
-const formatDate = (dateKey: string): string => {
+const formatDate = (dateKey: string, locale: string): string => {
   const [year, month, day] = dateKey.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     weekday: "short",
     month: "short",
     day: "numeric",
   }).format(new Date(year, month - 1, day));
 };
 
-const formatTime = (time: string): string => {
+const formatTime = (time: string, locale: string): string => {
   const [hours, minutes] = time.split(":").map(Number);
   const date = new Date();
   date.setHours(hours, minutes, 0, 0);
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
@@ -52,11 +53,6 @@ const formatTime = (time: string): string => {
 
 const getStatusClass = (status: CaseStatus): string =>
   status.toLowerCase().replaceAll(" ", "-");
-
-const getDocumentProgress = (surgicalCase: SurgicalCase): string => {
-  const completedCount = surgicalCase.documents.filter((document) => document.complete).length;
-  return `${completedCount}/${surgicalCase.documents.length}`;
-};
 
 const HomePageView = ({
   cases,
@@ -77,6 +73,11 @@ const HomePageView = ({
   onDocumentToggle,
   onResetDemo,
 }: HomePageViewProps): JSX.Element => {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage === "mkd" ? "mk-MK" : "en-US";
+  const localizeRoom = (room: string): string => t("common.operatingRoom", {
+    number: room.replace(/\D/g, ""),
+  });
   const selectedDateCases = cases
     .filter((surgicalCase) => surgicalCase.date === selectedDate)
     .sort((first, second) => first.startTime.localeCompare(second.startTime));
@@ -93,12 +94,12 @@ const HomePageView = ({
       <table className="case-table">
         <thead>
           <tr>
-            <th>CASE</th>
-            <th>PROCEDURE</th>
-            <th>SURGEON</th>
-            <th>SCHEDULE</th>
-            <th>DOCUMENTS</th>
-            <th>STATUS</th>
+                <th>{t("cases.columns.case")}</th>
+                <th>{t("cases.columns.procedure")}</th>
+                <th>{t("cases.columns.surgeon")}</th>
+                <th>{t("cases.columns.schedule")}</th>
+                <th>{t("cases.columns.documents")}</th>
+                <th>{t("cases.columns.status")}</th>
           </tr>
         </thead>
         <tbody>
@@ -110,21 +111,24 @@ const HomePageView = ({
               </td>
               <td>
                 <span className="procedure-name">{surgicalCase.procedure}</span>
-                {surgicalCase.priority === "Urgent" && <span className="priority-badge">Urgent</span>}
+                {surgicalCase.priority === "Urgent" && <span className="priority-badge">{t("cases.urgent")}</span>}
               </td>
               <td>{surgicalCase.surgeon}</td>
               <td>
-                <strong>{formatDate(surgicalCase.date)}</strong>
-                <span className="table-subtext">{formatTime(surgicalCase.startTime)} · {surgicalCase.operatingRoom}</span>
+                <strong>{formatDate(surgicalCase.date, locale)}</strong>
+                <span className="table-subtext">{formatTime(surgicalCase.startTime, locale)} · {localizeRoom(surgicalCase.operatingRoom)}</span>
               </td>
               <td>
-                <span className={`document-count${getDocumentProgress(surgicalCase).startsWith("3/") ? " is-complete" : ""}`}>
-                  {getDocumentProgress(surgicalCase)} complete
+                <span className={`document-count${surgicalCase.documents.every((document) => document.complete) ? " is-complete" : ""}`}>
+                  {t("cases.documentProgress", {
+                    complete: surgicalCase.documents.filter((document) => document.complete).length,
+                    total: surgicalCase.documents.length,
+                  })}
                 </span>
               </td>
               <td>
                 <select
-                  aria-label={`Update status for ${surgicalCase.id}`}
+                  aria-label={t("status.updateLabel", { caseId: surgicalCase.id })}
                   className={`status-select status-${getStatusClass(surgicalCase.status)}`}
                   onChange={(event) => onStatusChange(surgicalCase.id, event.target.value as CaseStatus)}
                   value={surgicalCase.status}
@@ -135,7 +139,7 @@ const HomePageView = ({
                       key={status}
                       value={status}
                     >
-                      {status}
+                      {t(`status.${status}`)}
                     </option>
                   ))}
                 </select>
@@ -147,8 +151,8 @@ const HomePageView = ({
       {filteredCases.length === 0 && (
         <div className="empty-state">
           <span aria-hidden="true">⌕</span>
-          <h3>No matching cases</h3>
-          <p>Try another patient reference, procedure, surgeon, or case ID.</p>
+          <h3>{t("cases.noMatchesTitle")}</h3>
+          <p>{t("cases.noMatchesDescription")}</p>
         </div>
       )}
     </div>
@@ -158,68 +162,68 @@ const HomePageView = ({
     <>
       <div className="page-heading-row">
         <div>
-          <p className="page-eyebrow">OPERATIONS OVERVIEW</p>
-          <h1>Good morning. <span>Here’s your day.</span></h1>
-          <p className="page-description">A shared view of today’s surgical cases, readiness, and room activity.</p>
+          <p className="page-eyebrow">{t("overview.eyebrow")}</p>
+          <h1>{t("overview.titleLead")} <span>{t("overview.titleTail")}</span></h1>
+          <p className="page-description">{t("overview.description")}</p>
         </div>
-        <button className="button-primary" onClick={onOpenCaseForm} type="button">＋ Add case</button>
+        <button className="button-primary" onClick={onOpenCaseForm} type="button">{t("common.addCase")}</button>
       </div>
 
-      <section aria-label="Today's operations" className="metric-grid">
+        <section aria-label={t("overview.operationsLabel")} className="metric-grid">
         <article className="metric-card">
-          <div className="metric-topline"><span>CASES TODAY</span><span className="metric-icon">▤</span></div>
+          <div className="metric-topline"><span>{t("overview.casesToday")}</span><span className="metric-icon">▤</span></div>
           <strong>{todayCases.length}</strong>
-          <p>Scheduled procedures</p>
+          <p>{t("overview.scheduledProcedures")}</p>
         </article>
         <article className="metric-card">
-          <div className="metric-topline"><span>READY TO GO</span><span className="metric-icon is-green">✓</span></div>
+          <div className="metric-topline"><span>{t("overview.readyToGo")}</span><span className="metric-icon is-green">✓</span></div>
           <strong>{todayCases.filter((surgicalCase) => surgicalCase.status === "Ready").length}</strong>
-          <p>Cases with readiness confirmed</p>
+          <p>{t("overview.readinessConfirmed")}</p>
         </article>
         <article className="metric-card">
-          <div className="metric-topline"><span>DOCUMENTS COMPLETE</span><span className="metric-icon">▧</span></div>
+          <div className="metric-topline"><span>{t("overview.documentsComplete")}</span><span className="metric-icon">▧</span></div>
           <strong>{documentsReadyCount}<small>/{cases.length}</small></strong>
-          <p>Across all scheduled cases</p>
+          <p>{t("overview.allScheduledCases")}</p>
         </article>
         <article className="metric-card">
-          <div className="metric-topline"><span>ROOM TIME PLANNED</span><span className="metric-icon">◷</span></div>
+          <div className="metric-topline"><span>{t("overview.roomTimePlanned")}</span><span className="metric-icon">◷</span></div>
           <strong>{(scheduledMinutesToday / 60).toFixed(1)}<small>h</small></strong>
-          <p>Across 3 operating rooms</p>
+          <p>{t("overview.acrossRooms")}</p>
         </article>
       </section>
 
       <section className="panel-section">
         <div className="section-heading">
           <div>
-            <p className="page-eyebrow">{formatDate(selectedDate).toUpperCase()}</p>
-            <h2>Today’s schedule</h2>
+            <p className="page-eyebrow">{formatDate(selectedDate, locale).toUpperCase()}</p>
+            <h2>{t("overview.todaySchedule")}</h2>
           </div>
-          <button className="button-quiet" onClick={() => onSectionChange("Schedule")} type="button">View schedule <span>→</span></button>
+          <button className="button-quiet" onClick={() => onSectionChange("Schedule")} type="button">{t("overview.viewSchedule")} <span>→</span></button>
         </div>
         <div className="schedule-preview">
           <div aria-hidden="true" className="schedule-preview-header">
-            <span>TIME</span>
+            <span>{t("scheduleColumns.time")}</span>
             <span />
-            <span>CASE &amp; TEAM</span>
-            <span>ROOM</span>
-            <span>STATUS</span>
+            <span>{t("scheduleColumns.caseAndTeam")}</span>
+            <span>{t("scheduleColumns.room")}</span>
+            <span>{t("scheduleColumns.status")}</span>
           </div>
           {todayCases.length > 0 ? todayCases.map((surgicalCase) => (
             <article className="schedule-preview-row" key={surgicalCase.id}>
-              <div className="schedule-time">{formatTime(surgicalCase.startTime)}</div>
+              <div className="schedule-time">{formatTime(surgicalCase.startTime, locale)}</div>
               <div className="schedule-marker" aria-hidden="true" />
               <div className="schedule-case-summary">
                 <strong>{surgicalCase.procedure}</strong>
                 <span>{surgicalCase.patientId} · {surgicalCase.surgeon}</span>
               </div>
-              <span className="room-label">{surgicalCase.operatingRoom}</span>
-              <span className={`status-pill status-${getStatusClass(surgicalCase.status)}`}>{surgicalCase.status}</span>
+              <span className="room-label">{localizeRoom(surgicalCase.operatingRoom)}</span>
+            <span className={`status-pill status-${getStatusClass(surgicalCase.status)}`}>{t(`status.${surgicalCase.status}`)}</span>
             </article>
-          )) : <p className="inline-empty">No cases scheduled for today.</p>}
+          )) : <p className="inline-empty">{t("common.noCasesToday")}</p>}
         </div>
       </section>
 
-      <div className="demo-notice"><span>i</span> Sample workspace data is stored in this browser. Use the reset control below to restore the examples.</div>
+      <div className="demo-notice"><span>i</span> {t("overview.sampleNotice")}</div>
     </>
   );
 
@@ -227,21 +231,21 @@ const HomePageView = ({
     <>
       <div className="page-heading-row">
         <div>
-          <p className="page-eyebrow">SURGICAL REGISTER</p>
-          <h1>Cases <span>and coordination.</span></h1>
-          <p className="page-description">Track each case from scheduling through procedure day.</p>
+          <p className="page-eyebrow">{t("cases.eyebrow")}</p>
+          <h1>{t("cases.titleLead")} <span>{t("cases.titleTail")}</span></h1>
+          <p className="page-description">{t("cases.description")}</p>
         </div>
-        <button className="button-primary" onClick={onOpenCaseForm} type="button">＋ Add case</button>
+        <button className="button-primary" onClick={onOpenCaseForm} type="button">{t("common.addCase")}</button>
       </div>
       <section className="content-panel case-register">
         <div className="panel-toolbar">
-          <div><h2>All cases</h2><span>{filteredCases.length} {filteredCases.length === 1 ? "case" : "cases"}</span></div>
+          <div><h2>{t("cases.allCases")}</h2><span>{t("cases.caseCount", { count: filteredCases.length })}</span></div>
           <label className="search-field">
             <span aria-hidden="true">⌕</span>
             <input
-              aria-label="Search cases"
+              aria-label={t("cases.search")}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Search cases"
+              placeholder={t("cases.search")}
               value={searchTerm}
             />
           </label>
@@ -255,15 +259,15 @@ const HomePageView = ({
     <>
       <div className="page-heading-row">
         <div>
-          <p className="page-eyebrow">ROOM COORDINATION</p>
-          <h1>Operating room <span>schedule.</span></h1>
-          <p className="page-description">Review booked procedures and room assignments by day.</p>
+          <p className="page-eyebrow">{t("schedule.eyebrow")}</p>
+          <h1>{t("schedule.titleLead")} <span>{t("schedule.titleTail")}</span></h1>
+          <p className="page-description">{t("schedule.description")}</p>
         </div>
-        <label className="date-picker-label">SCHEDULE DATE
-          <input aria-label="Schedule date" onChange={(event) => onSelectedDateChange(event.target.value)} type="date" value={selectedDate} />
+        <label className="date-picker-label">{t("schedule.dateLabel")}
+          <input aria-label={t("schedule.dateInput")} onChange={(event) => onSelectedDateChange(event.target.value)} type="date" value={selectedDate} />
         </label>
       </div>
-      <section className="room-schedule-grid" aria-label={`Operating room schedule for ${formatDate(selectedDate)}`}>
+      <section className="room-schedule-grid" aria-label={t("schedule.roomSchedule", { date: formatDate(selectedDate, locale) })}>
         {OPERATING_ROOMS.map((room) => {
           const roomCases = selectedDateCases.filter((surgicalCase) => surgicalCase.operatingRoom === room);
           const roomMinutes = roomCases.reduce((total, surgicalCase) => total + surgicalCase.durationMinutes, 0);
@@ -271,23 +275,23 @@ const HomePageView = ({
           return (
             <article className="room-schedule-card" key={room}>
               <div className="room-card-heading">
-                <div><span className="room-symbol">＋</span><h2>{room}</h2></div>
-                <span>{(roomMinutes / 60).toFixed(1)}h booked</span>
+                <div><span className="room-symbol">＋</span><h2>{localizeRoom(room)}</h2></div>
+                <span>{t("schedule.bookedHours", { hours: (roomMinutes / 60).toFixed(1) })}</span>
               </div>
               {roomCases.length > 0 ? (
                 <div className="room-case-list">
                   {roomCases.map((surgicalCase) => (
                     <div className="room-case" key={surgicalCase.id}>
-                      <div className="room-case-time">{formatTime(surgicalCase.startTime)}<span>{surgicalCase.durationMinutes} min</span></div>
+                      <div className="room-case-time">{formatTime(surgicalCase.startTime, locale)}<span>{t("schedule.minutes", { count: surgicalCase.durationMinutes })}</span></div>
                       <div className="room-case-content">
                         <strong>{surgicalCase.procedure}</strong>
                         <span>{surgicalCase.patientId} · {surgicalCase.surgeon}</span>
-                        <span className={`status-pill status-${getStatusClass(surgicalCase.status)}`}>{surgicalCase.status}</span>
+                        <span className={`status-pill status-${getStatusClass(surgicalCase.status)}`}>{t(`status.${surgicalCase.status}`)}</span>
                       </div>
                     </div>
                   ))}
                 </div>
-              ) : <div className="room-empty">No cases assigned to this room.</div>}
+              ) : <div className="room-empty">{t("schedule.emptyRoom")}</div>}
             </article>
           );
         })}
@@ -299,13 +303,13 @@ const HomePageView = ({
     <>
       <div className="page-heading-row">
         <div>
-          <p className="page-eyebrow">PRE-PROCEDURE CHECKLIST</p>
-          <h1>Documentation <span>readiness.</span></h1>
-          <p className="page-description">Keep required documentation visible and follow up on outstanding items.</p>
+          <p className="page-eyebrow">{t("documentation.eyebrow")}</p>
+          <h1>{t("documentation.titleLead")} <span>{t("documentation.titleTail")}</span></h1>
+          <p className="page-description">{t("documentation.description")}</p>
         </div>
-        <div className="documentation-summary"><strong>{documentsReadyCount}</strong><span>of {cases.length} cases ready</span></div>
+        <div className="documentation-summary"><strong>{documentsReadyCount}</strong><span>{t("documentation.readyCount", { count: cases.length })}</span></div>
       </div>
-      <section className="documentation-list" aria-label="Case documentation checklist">
+      <section className="documentation-list" aria-label={t("documentation.checklist")}>
         {cases.map((surgicalCase) => {
           const completeCount = surgicalCase.documents.filter((document) => document.complete).length;
           const progress = surgicalCase.documents.length === 0 ? 0 : completeCount / surgicalCase.documents.length * 100;
@@ -316,29 +320,29 @@ const HomePageView = ({
                 <div>
                   <span className="case-reference">{surgicalCase.id} · {surgicalCase.patientId}</span>
                   <h2>{surgicalCase.procedure}</h2>
-                  <p>{formatDate(surgicalCase.date)} · {surgicalCase.operatingRoom} · {surgicalCase.surgeon}</p>
+                      <p>{formatDate(surgicalCase.date, locale)} · {localizeRoom(surgicalCase.operatingRoom)} · {surgicalCase.surgeon}</p>
                 </div>
-                <span className={`status-pill status-${getStatusClass(surgicalCase.status)}`}>{surgicalCase.status}</span>
+                <span className={`status-pill status-${getStatusClass(surgicalCase.status)}`}>{t(`status.${surgicalCase.status}`)}</span>
               </div>
               <div className="document-progress-track"><span style={{ width: `${progress}%` }} /></div>
               <div className="document-checklist">
                 {surgicalCase.documents.map((document) => (
                   <label className={`document-check${document.complete ? " is-checked" : ""}`} key={document.id}>
                     <input
-                      aria-label={`${document.label} for ${surgicalCase.id}`}
+                      aria-label={`${t(`documentation.labels.${document.id}`, { defaultValue: document.label })} for ${surgicalCase.id}`}
                       checked={document.complete}
                       onChange={() => onDocumentToggle(surgicalCase.id, document.id)}
                       type="checkbox"
                     />
                     <span className="custom-checkbox" aria-hidden="true">✓</span>
-                    {document.label}
+                    {t(`documentation.labels.${document.id}`, { defaultValue: document.label })}
                   </label>
                 ))}
               </div>
             </article>
           );
         })}
-        {cases.length === 0 && <p className="inline-empty">No cases yet. Add a case to start the checklist.</p>}
+        {cases.length === 0 && <p className="inline-empty">{t("common.noCasesYet")}</p>}
       </section>
     </>
   );
@@ -347,20 +351,26 @@ const HomePageView = ({
     <>
       <div className="page-heading-row">
         <div>
-          <p className="page-eyebrow">RESOURCE PLANNING</p>
-          <h1>Room <span>capacity.</span></h1>
-          <p className="page-description">Understand scheduled operating time across the available rooms.</p>
+          <p className="page-eyebrow">{t("capacity.eyebrow")}</p>
+          <h1>{t("capacity.titleLead")} <span>{t("capacity.titleTail")}</span></h1>
+          <p className="page-description">{t("capacity.description")}</p>
         </div>
-        <label className="date-picker-label">CAPACITY DATE
-          <input aria-label="Capacity date" onChange={(event) => onSelectedDateChange(event.target.value)} type="date" value={selectedDate} />
+        <label className="date-picker-label">{t("capacity.dateLabel")}
+          <input aria-label={t("capacity.dateInput")} onChange={(event) => onSelectedDateChange(event.target.value)} type="date" value={selectedDate} />
         </label>
       </div>
       <section className="capacity-summary">
-        <div><span>PLANNED PROCEDURES</span><strong>{selectedDateCases.length}</strong></div>
-        <div><span>BOOKED ROOM TIME</span><strong>{(selectedDateCases.reduce((total, surgicalCase) => total + surgicalCase.durationMinutes, 0) / 60).toFixed(1)}<small> hrs</small></strong></div>
-        <div><span>AVAILABLE ROOMS</span><strong>{OPERATING_ROOMS.length}</strong></div>
+        <div><span>{t("capacity.plannedProcedures")}</span><strong>{selectedDateCases.length}</strong></div>
+        <div>
+          <span>{t("capacity.bookedRoomTime")}</span>
+          <strong>
+            {(selectedDateCases.reduce((total, surgicalCase) => total + surgicalCase.durationMinutes, 0) / 60).toFixed(1)}
+            <small> {t("capacity.hours")}</small>
+          </strong>
+        </div>
+        <div><span>{t("capacity.availableRooms")}</span><strong>{OPERATING_ROOMS.length}</strong></div>
       </section>
-      <section className="capacity-room-list" aria-label="Operating room utilization">
+      <section className="capacity-room-list" aria-label={t("capacity.roomUtilization")}>
         {OPERATING_ROOMS.map((room) => {
           const roomCases = selectedDateCases.filter((surgicalCase) => surgicalCase.operatingRoom === room);
           const roomMinutes = roomCases.reduce((total, surgicalCase) => total + surgicalCase.durationMinutes, 0);
@@ -369,18 +379,21 @@ const HomePageView = ({
           return (
             <article className="capacity-room-card" key={room}>
               <div className="capacity-room-heading">
-                <div><span className="room-symbol">＋</span><strong>{room}</strong></div>
-                <span>{(roomMinutes / 60).toFixed(1)} / 8.0 hrs</span>
+              <div><span className="room-symbol">＋</span><strong>{localizeRoom(room)}</strong></div>
+                <span>{(roomMinutes / 60).toFixed(1)} / 8.0 {t("capacity.hours")}</span>
               </div>
-              <div className="capacity-track" aria-label={`${room} ${utilization}% utilized`}>
+              <div className="capacity-track" aria-label={t("capacity.roomUtilization") + `: ${localizeRoom(room)} ${utilization}%`}>
                 <span style={{ width: `${utilization}%` }} />
               </div>
-              <div className="capacity-room-footer"><span>{utilization}% scheduled</span><span>{roomCases.length} {roomCases.length === 1 ? "case" : "cases"}</span></div>
+              <div className="capacity-room-footer">
+                <span>{t("capacity.scheduledPercent", { percent: utilization })}</span>
+                <span>{t("capacity.caseCount", { count: roomCases.length })}</span>
+              </div>
             </article>
           );
         })}
       </section>
-      <p className="capacity-footnote">Planning estimate uses an 8-hour operating day per room. Turnover and emergency holds are not included.</p>
+      <p className="capacity-footnote">{t("capacity.footnote")}</p>
     </>
   );
 
@@ -398,13 +411,13 @@ const HomePageView = ({
       <div className="app-workspace">
         <Header sectionName={activeSection} />
         <main className="workspace-main">
-          {notice && <div aria-live="polite" className="workspace-notice" role="status"><span>✓</span>{notice}</div>}
+          {notice && <div aria-live="polite" className="workspace-notice" role="status"><span>✓</span>{t(notice.key, { caseId: notice.caseId })}</div>}
           {sectionContent[activeSection]()}
-          <button className="reset-demo-button" onClick={onResetDemo} type="button">Restore sample data</button>
+          <button className="reset-demo-button" onClick={onResetDemo} type="button">{t("common.restoreSampleData")}</button>
         </main>
         <footer className="app-footer">
-          <span>SURGICAL CARE, IN SYNC</span>
-          <span>Local demo workspace · not connected to a hospital system</span>
+          <span>{t("common.footerTagline")}</span>
+          <span>{t("common.footerDescription")}</span>
         </footer>
       </div>
       {isCaseFormOpen && <CaseForm onClose={onCloseCaseForm} onCreateCase={onCreateCase} />}

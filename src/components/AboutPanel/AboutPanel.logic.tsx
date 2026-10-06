@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import { useTranslation } from "react-i18next";
 import type { WorkspaceSection } from "../../domain/surgicalCases";
 import AboutPanelView from "./AboutPanel.view";
 
@@ -8,14 +9,26 @@ interface AboutPanelProps {
 }
 
 const AboutPanel = ({ activeSection, onSectionChange }: AboutPanelProps): JSX.Element => (
-  <AboutPanelView
-    productName="SurgiFlow"
-    tagline="More time for care. Less friction in every step."
-    description="A clearer way for hospitals and surgical teams to coordinate cases, schedules, and the details that keep care moving."
-    capabilities={["Surgical case coordination", "Scheduling & capacity", "Patient documentation"]}
-    activeSection={activeSection}
-    onSectionChange={onSectionChange}
-  />
+  <AboutPanelContent activeSection={activeSection} onSectionChange={onSectionChange} />
 );
+
+const AboutPanelContent = ({ activeSection, onSectionChange }: AboutPanelProps): JSX.Element => {
+  const { t } = useTranslation();
+
+  return (
+    <AboutPanelView
+      productName="SurgiFlow"
+      tagline={t("sidebar.tagline")}
+      description={t("sidebar.description")}
+      capabilities={[
+        t("sidebar.capabilities.cases"),
+        t("sidebar.capabilities.schedule"),
+        t("sidebar.capabilities.documentation"),
+      ]}
+      activeSection={activeSection}
+      onSectionChange={onSectionChange}
+    />
+  );
+};
 
 export default AboutPanel;

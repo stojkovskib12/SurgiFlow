@@ -1,0 +1,172 @@
+{
+  "language": "Language",
+  "languages": {
+    "en": "English",
+    "mkd": "Македонски"
+  },
+  "navigation": {
+    "overview": "Overview",
+    "cases": "Cases",
+    "schedule": "Schedule",
+    "documentation": "Documentation",
+    "capacity": "Capacity"
+  },
+  "sidebar": {
+    "brandCaption": "SURGICAL OPERATIONS",
+    "eyebrow": "CARE, COORDINATED",
+    "tagline": "More time for care. Less friction in every step.",
+    "description": "A clearer way for hospitals and surgical teams to coordinate cases, schedules, and the details that keep care moving.",
+    "workspace": "WORKSPACE",
+    "navigationLabel": "Main navigation",
+    "capabilitiesHeading": "BUILT FOR THE CARE TEAM",
+    "capabilitiesDescription": "Keep the people, plans, and patient details behind every procedure moving together.",
+    "capabilities": {
+      "cases": "Surgical case coordination",
+      "schedule": "Scheduling & capacity",
+      "documentation": "Patient documentation"
+    },
+    "footer": "Built for the people behind every procedure"
+  },
+  "header": {
+    "workspace": "SURGICAL OPERATIONS",
+    "breadcrumb": "Breadcrumb",
+    "demoWorkspace": "Demo workspace",
+    "profile": "User profile"
+  },
+  "scheduleColumns": {
+    "time": "TIME",
+    "caseAndTeam": "CASE & TEAM",
+    "room": "ROOM",
+    "status": "STATUS"
+  },
+  "overview": {
+    "eyebrow": "OPERATIONS OVERVIEW",
+    "titleLead": "Good morning.",
+    "titleTail": "Here’s your day.",
+    "description": "A shared view of today’s surgical cases, readiness, and room activity.",
+    "casesToday": "CASES TODAY",
+    "scheduledProcedures": "Scheduled procedures",
+    "readyToGo": "READY TO GO",
+    "readinessConfirmed": "Cases with readiness confirmed",
+    "documentsComplete": "DOCUMENTS COMPLETE",
+    "allScheduledCases": "Across all scheduled cases",
+    "roomTimePlanned": "ROOM TIME PLANNED",
+    "acrossRooms": "Across 3 operating rooms",
+    "todaySchedule": "Today’s schedule",
+    "viewSchedule": "View schedule",
+    "sampleNotice": "Sample workspace data is stored in this browser. Use the reset control below to restore the examples."
+  },
+  "cases": {
+    "eyebrow": "SURGICAL REGISTER",
+    "titleLead": "Cases",
+    "titleTail": "and coordination.",
+    "description": "Track each case from scheduling through procedure day.",
+    "allCases": "All cases",
+    "caseCount_one": "{{count}} case",
+    "caseCount_other": "{{count}} cases",
+    "search": "Search cases",
+    "columns": {
+      "case": "CASE",
+      "procedure": "PROCEDURE",
+      "surgeon": "SURGEON",
+      "schedule": "SCHEDULE",
+      "documents": "DOCUMENTS",
+      "status": "STATUS"
+    },
+    "urgent": "Urgent",
+    "documentProgress": "{{complete}}/{{total}} complete",
+    "noMatchesTitle": "No matching cases",
+    "noMatchesDescription": "Try another patient reference, procedure, surgeon, or case ID."
+  },
+  "schedule": {
+    "eyebrow": "ROOM COORDINATION",
+    "titleLead": "Operating room",
+    "titleTail": "schedule.",
+    "description": "Review booked procedures and room assignments by day.",
+    "dateLabel": "SCHEDULE DATE",
+    "dateInput": "Schedule date",
+    "roomSchedule": "Operating room schedule for {{date}}",
+    "bookedHours": "{{hours}}h booked",
+    "minutes": "{{count}} min",
+    "emptyRoom": "No cases assigned to this room."
+  },
+  "documentation": {
+    "eyebrow": "PRE-PROCEDURE CHECKLIST",
+    "titleLead": "Documentation",
+    "titleTail": "readiness.",
+    "description": "Keep required documentation visible and follow up on outstanding items.",
+    "readyCount": "of {{count}} cases ready",
+    "checklist": "Case documentation checklist",
+    "labels": {
+      "consent": "Consent",
+      "pre-op-assessment": "Pre-op assessment",
+      "imaging-review": "Imaging review"
+    }
+  },
+  "capacity": {
+    "eyebrow": "RESOURCE PLANNING",
+    "titleLead": "Room",
+    "titleTail": "capacity.",
+    "description": "Understand scheduled operating time across the available rooms.",
+    "dateLabel": "CAPACITY DATE",
+    "dateInput": "Capacity date",
+    "plannedProcedures": "PLANNED PROCEDURES",
+    "bookedRoomTime": "BOOKED ROOM TIME",
+    "availableRooms": "AVAILABLE ROOMS",
+    "hours": "hrs",
+    "roomUtilization": "Operating room utilization",
+    "scheduledPercent": "{{percent}}% scheduled",
+    "caseCount_one": "{{count}} case",
+    "caseCount_other": "{{count}} cases",
+    "footnote": "Planning estimate uses an 8-hour operating day per room. Turnover and emergency holds are not included."
+  },
+  "caseForm": {
+    "eyebrow": "CASE INTAKE",
+    "title": "Add a surgical case",
+    "description": "Capture the essentials to coordinate the procedure.",
+    "close": "Close form",
+    "patientReference": "Patient reference",
+    "patientPlaceholder": "e.g. Patient 1048",
+    "procedure": "Procedure",
+    "procedurePlaceholder": "Procedure name",
+    "leadSurgeon": "Lead surgeon",
+    "surgeonPlaceholder": "Surgeon name",
+    "priority": "Priority",
+    "routine": "Routine",
+    "urgent": "Urgent",
+    "surgeryDate": "Surgery date",
+    "startTime": "Start time",
+    "duration": "Duration (minutes)",
+    "operatingRoom": "Operating room",
+    "roomOption": "Operating room {{number}}",
+    "cancel": "Cancel",
+    "submit": "Add case",
+    "roomConflict": "{{room}} already has a case booked during that time. Choose another room or start time."
+  },
+  "status": {
+    "Scheduled": "Scheduled",
+    "Pre-op": "Pre-op",
+    "Ready": "Ready",
+    "In progress": "In progress",
+    "Completed": "Completed",
+    "updateLabel": "Update status for {{caseId}}"
+  },
+  "notifications": {
+    "added": "{{caseId}} added to the surgical schedule.",
+    "statusUpdated": "{{caseId}} status updated.",
+    "documentsUpdated": "{{caseId}} documentation updated.",
+    "sampleRestored": "Sample cases restored.",
+    "storageUnavailable": "Changes are available for this session but could not be saved in this browser."
+  },
+  "common": {
+    "addCase": "＋ Add case",
+    "restoreSampleData": "Restore sample data",
+    "today": "Today",
+    "noCasesToday": "No cases scheduled for today.",
+    "noCasesYet": "No cases yet. Add a case to start the checklist.",
+    "footerTagline": "SURGICAL CARE, IN SYNC",
+    "footerDescription": "Local demo workspace · not connected to a hospital system",
+    "loading": "Loading workspace…",
+    "operatingRoom": "OR {{number}}"
+  }
+}
