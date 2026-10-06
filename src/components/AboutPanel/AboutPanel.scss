@@ -19,6 +19,15 @@
 .panel-eyebrow { margin: 0 0 19px; color: #94cbb9; font-size: 10px; font-weight: 800; letter-spacing: .19em; }
 .about-copy h1 { max-width: 330px; margin: 0; color: #f3f7f5; font-size: clamp(35px, 4vw, 49px); font-weight: 500; line-height: 1.08; letter-spacing: -.055em; }
 .panel-description { max-width: 340px; margin: 19px 0 0; color: #b4c8c8; font-size: 13px; line-height: 1.8; }
+.workspace-navigation { position: relative; z-index: 1; display: grid; gap: 5px; margin-top: 34px; }
+.navigation-label { margin: 0 0 8px 10px; color: #83a6a2; font-size: 9px; font-weight: 800; letter-spacing: .17em; }
+.navigation-item { display: flex; align-items: center; gap: 12px; min-height: 39px; padding: 0 11px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #b4c8c8; cursor: pointer; font: inherit; font-size: 12px; text-align: left; transition: color .15s ease, background .15s ease;
+  span { width: 17px; color: #84aaa3; font-size: 14px; text-align: center; }
+  &:hover { background: rgba(255, 255, 255, .06); color: #fff; }
+  &.is-active { border-color: rgba(164, 213, 195, .13); background: rgba(164, 213, 195, .1); color: #f1f7f4; font-weight: 650;
+    span { color: #a4d5c3; }
+  }
+}
 .panel-divider { width: 100%; height: 1px; margin: 36px 0 27px; background: rgba(207, 229, 223, .13); }
 .panel-capabilities {
   position: relative; z-index: 1;
@@ -37,10 +46,13 @@
 @media (max-width: 760px) {
   .about-panel { min-height: auto; padding: 22px 24px 20px; }
   .about-copy { margin-top: 39px; }
-  .about-copy h1 { max-width: 520px; font-size: 38px; }
+  .about-copy h1 { max-width: 520px; font-size: 33px; }
   .panel-description { max-width: 560px; }
-  .panel-divider { margin: 24px 0 18px; }
-  .panel-capabilities > p { margin-bottom: 14px; }
-  .panel-capabilities ol { grid-template-columns: 1fr; gap: 10px; }
-  .about-footer { margin-top: 25px; padding-top: 16px; border-top: 1px solid rgba(207, 229, 223, .13); }
+  .workspace-navigation { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin-top: 25px; }
+  .navigation-label { grid-column: 1 / -1; }
+  .navigation-item { justify-content: center; gap: 6px; padding: 0 6px; font-size: 10px;
+    span { display: none; }
+  }
+  .panel-divider, .panel-capabilities { display: none; }
+  .about-footer { margin-top: 15px; padding-top: 14px; border-top: 1px solid rgba(207, 229, 223, .13); }
 }

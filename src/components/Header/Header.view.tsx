@@ -4,9 +4,10 @@ import "./Header.scss";
 export interface HeaderViewProps {
   sectionName: string;
   workspaceName: string;
+  todayLabel: string;
 }
 
-const HeaderView = ({ sectionName, workspaceName }: HeaderViewProps): JSX.Element => (
+const HeaderView = ({ sectionName, workspaceName, todayLabel }: HeaderViewProps): JSX.Element => (
   <header className="workspace-header">
     <nav className="workspace-breadcrumb" aria-label="Breadcrumb">
       <span>{workspaceName}</span>
@@ -14,7 +15,8 @@ const HeaderView = ({ sectionName, workspaceName }: HeaderViewProps): JSX.Elemen
       <span className="breadcrumb-current">{sectionName}</span>
     </nav>
     <div className="header-tools">
-      <span className="workspace-status"><span aria-hidden="true" /> Workspace ready</span>
+      <span className="header-date">{todayLabel}</span>
+      <span className="workspace-status"><span aria-hidden="true" /> Demo workspace</span>
       <button className="profile-button" type="button" aria-label="User profile">SF</button>
     </div>
   </header>

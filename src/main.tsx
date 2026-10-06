@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import AppWrapper from "./app/AppWrapper";
+import AppWrapper from "./app/AppWrapper/AppWrapper.logic";
 import "./styles.scss";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
