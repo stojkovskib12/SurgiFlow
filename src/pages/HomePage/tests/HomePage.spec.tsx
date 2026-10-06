@@ -1,14 +1,21 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
+import { Provider } from "react-redux";
+import { createAppStore } from "../../../app/store";
+import { WorkspaceProvider } from "../../../app/WorkspaceContext/WorkspaceContext";
 import HomePage from "../HomePage.logic";
 import { STORAGE_KEY } from "../../../domain/surgicalCases";
 
 describe("HomePage", () => {
   const renderHomePage = () => render(
-    <MemoryRouter>
-      <HomePage basePath="" />
-    </MemoryRouter>,
+    <Provider store={createAppStore()}>
+      <WorkspaceProvider>
+        <MemoryRouter>
+          <HomePage basePath="" />
+        </MemoryRouter>
+      </WorkspaceProvider>
+    </Provider>,
   );
 
   beforeEach(() => {

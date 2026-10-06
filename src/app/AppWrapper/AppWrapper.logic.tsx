@@ -1,6 +1,6 @@
 import { useMemo, type JSX } from "react";
-import { configureStore } from "@reduxjs/toolkit";
 import { QueryClient } from "@tanstack/react-query";
+import { createAppStore } from "../store";
 import AppWrapperView from "./AppWrapper.view";
 
 export interface AppWrapperProps {
@@ -8,15 +8,11 @@ export interface AppWrapperProps {
   baseRouteName: string;
 }
 
-const createStore = () => configureStore({ reducer: (state = {}) => state });
-
-export type AppStore = ReturnType<typeof createStore>;
-
 const AppWrapper = ({
   isStandaloneApp = false,
   baseRouteName,
 }: AppWrapperProps): JSX.Element => {
-  const store = useMemo(createStore, []);
+  const store = useMemo(createAppStore, []);
   const queryClient = useMemo(() => new QueryClient({
     defaultOptions: {
       queries: {

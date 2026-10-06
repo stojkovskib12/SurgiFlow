@@ -1,20 +1,19 @@
 import { useEffect, useMemo, useState, type JSX } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
-import type {
-  CaseStatus,
-  NewSurgicalCase,
-  SurgicalCase,
-  SurgicalDocument,
-  WorkspaceSection,
-} from "../../domain/surgicalCases";
+import type { NewSurgicalCase, WorkspaceSection } from "../../domain/surgicalCases";
 import {
-  createDemoCases,
   getTodayKey,
-  readCasesFromStorage,
-  REQUIRED_DOCUMENTS,
   STORAGE_KEY,
 } from "../../domain/surgicalCases";
+import {
+  caseAdded,
+  caseStatusChanged,
+  demoCasesRestored,
+  documentToggled,
+} from "../../app/store/surgicalCases.slice";
+import { useAppDispatch, useAppSelector } from "../../app/store/hooks";
+import { useWorkspaceContext } from "../../app/WorkspaceContext/WorkspaceContext";
 import HomePageView from "./HomePage.view";
 
 interface HomePageProps {
@@ -32,16 +31,22 @@ const sectionPaths: Record<WorkspaceSection, string> = {
 const HomePage = ({ basePath }: HomePageProps): JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const cases = useAppSelector((state) => state.surgicalCases);
+  const {
+    isCaseFormOpen,
+    notice,
+    openCaseForm,
+    closeCaseForm,
+    setNotice,
+  } = useWorkspaceContext();
   const { pathname } = useLocation();
   const baseSegmentCount = basePath.split("/").filter(Boolean).length;
   const routeSegment = pathname.split("/").filter(Boolean).slice(baseSegmentCount).at(-1);
   const activeSection = (Object.entries(sectionPaths).find(([, path]) => path === routeSegment)?.[0]
     ?? "Overview") as WorkspaceSection;
-  const [cases, setCases] = useState<SurgicalCase[]>(readCasesFromStorage);
   const [selectedDate, setSelectedDate] = useState(getTodayKey);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isCaseFormOpen, setCaseFormOpen] = useState(false);
-  const [notice, setNotice] = useState<{ key: string; caseId?: string } | null>(null);
 
   useEffect(() => {
     try {
@@ -100,54 +105,24 @@ const HomePage = ({ basePath }: HomePageProps): JSX.Element => {
       const numericId = Number(surgicalCase.id.replace("SF-", ""));
       return Number.isNaN(numericId) ? largest : Math.max(largest, numericId);
     }, 2040);
-    const surgicalCase: SurgicalCase = {
-      ...newCase,
-      id: `SF-${largestId + 1}`,
-      status: "Scheduled",
-      documents: REQUIRED_DOCUMENTS.map((label) => ({
-        id: label.toLowerCase().replaceAll(" ", "-"),
-        label,
-        complete: false,
-      })),
-    };
-
-    setCases((currentCases) => [...currentCases, surgicalCase]);
-    setNotice({ key: "notifications.added", caseId: surgicalCase.id });
+    const caseId = `SF-${largestId + 1}`;
+    dispatch(caseAdded(newCase));
+    setNotice({ key: "notifications.added", caseId });
     return null;
   };
 
-  const handleStatusChange = (caseId: string, status: CaseStatus): void => {
-    setCases((currentCases) => currentCases.map((surgicalCase) => (
-      surgicalCase.id === caseId ? { ...surgicalCase, status } : surgicalCase
-    )));
+  const handleStatusChange = (caseId: string, status: import("../../domain/surgicalCases").CaseStatus): void => {
+    dispatch(caseStatusChanged({ caseId, status }));
     setNotice({ key: "notifications.statusUpdated", caseId });
   };
 
   const handleDocumentToggle = (caseId: string, documentId: string): void => {
-    setCases((currentCases) => currentCases.map((surgicalCase) => {
-      if (surgicalCase.id !== caseId) {
-        return surgicalCase;
-      }
-
-      const documents: SurgicalDocument[] = surgicalCase.documents.map((document) => (
-        document.id === documentId ? { ...document, complete: !document.complete } : document
-      ));
-      const allDocumentsComplete = documents.every((document) => document.complete);
-      let status = surgicalCase.status;
-
-      if (allDocumentsComplete && ["Scheduled", "Pre-op"].includes(status)) {
-        status = "Ready";
-      } else if (!allDocumentsComplete && status === "Ready") {
-        status = "Pre-op";
-      }
-
-      return { ...surgicalCase, documents, status };
-    }));
+    dispatch(documentToggled({ caseId, documentId }));
     setNotice({ key: "notifications.documentsUpdated", caseId });
   };
 
   const handleResetDemo = (): void => {
-    setCases(createDemoCases());
+    dispatch(demoCasesRestored());
     setNotice({ key: "notifications.sampleRestored" });
   };
 
@@ -176,8 +151,8 @@ const HomePage = ({ basePath }: HomePageProps): JSX.Element => {
       onSectionChange={handleSectionChange}
       onSelectedDateChange={setSelectedDate}
       onSearchChange={setSearchTerm}
-      onOpenCaseForm={() => setCaseFormOpen(true)}
-      onCloseCaseForm={() => setCaseFormOpen(false)}
+      onOpenCaseForm={openCaseForm}
+      onCloseCaseForm={closeCaseForm}
       onCreateCase={handleCreateCase}
       onStatusChange={handleStatusChange}
       onDocumentToggle={handleDocumentToggle}

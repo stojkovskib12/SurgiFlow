@@ -2,8 +2,9 @@ import type { JSX } from "react";
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
+import { WorkspaceProvider } from "../WorkspaceContext/WorkspaceContext";
 import AppRoutes from "../AppRoutes/AppRoutes.logic";
-import type { AppStore } from "./AppWrapper.logic";
+import type { AppStore } from "../store";
 
 interface AppWrapperViewProps {
   isStandaloneApp: boolean;
@@ -21,8 +22,10 @@ const AppWrapperView = ({
   <div className="app-root" data-standalone={isStandaloneApp}>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <AppRoutes baseRouteName={baseRouteName} isStandaloneApp={isStandaloneApp} />
-        <div aria-live="polite" id="notification-region" />
+        <WorkspaceProvider>
+          <AppRoutes baseRouteName={baseRouteName} isStandaloneApp={isStandaloneApp} />
+          <div aria-live="polite" id="notification-region" />
+        </WorkspaceProvider>
       </QueryClientProvider>
     </Provider>
   </div>
